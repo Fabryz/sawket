@@ -51,15 +51,13 @@ socket.on('connection', function(client) {
 			y += 10;
 			conn.push({ id: id,
 						username: username,
-						socket: socket,
+						//socket: socket,
 						x: x, y: y });
 			
 			console.log('- '+ username +' is now partecipating');				
-			socket.broadcast(JSON.stringify({ msg: '<strong>"'+ username +'" is now partecipating.</strong>', msg_type: 'info' }));
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userjoin' }));
 			socket.broadcast(JSON.stringify({ msg: conn.toString(), msg_type: 'userlist' }));
 			
-		
 			if (history.length > 0) {
 				history.forEach(function(h) {
 					client.send(JSON.stringify({ username: h.username, msg: h.msg, msg_type: 'history'}));
@@ -78,16 +76,21 @@ socket.on('connection', function(client) {
 		}
 				
 		console.log(JSON.stringify({ username: username, msg: data, x: x, y: y}));	
-			
-		switch (data) {
+		
+		var action = data.split(" ");	
+		switch (action[0]) {
 			case '/who':
 					if (total == 1)
-						client.send(JSON.stringify({ msg: '* You are forever alone.', msg_type: 'info' }));
+						client.send(JSON.stringify({ msg: 'You are forever alone.', msg_type: 'info' }));
 					else
-						client.send(JSON.stringify({ msg: '* There are '+ total +' users connected.', msg_type: 'info' }));
+						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected.', msg_type: 'info' }));
 				break;
-			case '/qwe':
-					client.send(JSON.stringify({ msg: '* There are '+ total +' users connected.', msg_type: 'info' }));
+			case '/nick':
+					if (action[1] != '') {
+						socket.broadcast(JSON.stringify({ msg: '"'+ username +'" is now known as "'+ action[1] +'".', msg_type: 'event' }));
+						username = action[1];
+					} else
+						return;
 				break;
 				
 			default:

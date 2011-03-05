@@ -35,9 +35,12 @@
 				
 				switch (data.msg_type) {
 					case 'userjoin':
+							log.append('<strong>* "'+ data.username +'" is now partecipating.</strong>');
 							users.append('<li>'+ data.username +'</li>');
 						break;
-					case 'userquit':	//WIP
+					case 'userquit':
+							log.append('<strong>* "'+ data.username +'" has left the chat.</strong>');
+							
 							var appo = users.find(data.msg);
 							appo.remove();
 						break;
@@ -47,12 +50,18 @@
 							});
 						break;
 					case 'info':
-							log.append('<li>'+ data.msg +'</li>');
+							log.append('<li>* '+ data.msg +'</li>');
+						break;
+					case 'event':
+							log.append('<li class="event">* '+ data.msg +'</li>');
+						break;
+					case 'history':
+							log.append('<li class="history">&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
 						break;
 			
 					default:
-						log.append('<li>&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
-					break;
+							log.append('<li>&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
+						break;
 				}				
 				
 				clearCanvas();
@@ -117,6 +126,15 @@
     		list-style-type: none;
     		margin-left: 10px;
     		padding: 0;
+    	}
+    	
+    	#log .history {
+    		color: #555;
+    		font-style: italic;
+    	}
+    	
+    	#log .event {
+    		font-weight: bold;
     	}
     	
     	.clearer {

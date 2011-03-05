@@ -29,7 +29,10 @@ Features
 --------
 
 * Normal users and lurkers
-* Event and action messages (join/quit/total users)
+* Event and action messages
+	* Join/quit
+	* Number of connected users
+	* Nick change
 * 5 slots message history
 * Users list
 
