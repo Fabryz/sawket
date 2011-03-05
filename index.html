@@ -9,7 +9,7 @@
     
     <script type="text/javascript">
 		$(document).ready(function() {		
-			var socket = new io.Socket('localhost', {port: 80}),
+			var socket = new io.Socket('localhost', {port: 8080}),
 				log = $("#log ul"),
 				users = $("#users ul"),
 				text = $("#text"),
@@ -125,7 +125,7 @@
     </style>
 </head>
 <body>
-	<h1>Sawket</h1>
+	<h1>Sawket sandbox</h1>
 	<p>Simple Node.js + Socket.io chat.</p>
   	<canvas id="canvas" width="500" height="200"></canvas>
 	<div id="log"><ul></ul></div>

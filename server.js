@@ -1,8 +1,10 @@
 /*
 * Author: Fabrizio Codello
-* Name: Experimenting with socket.io
+* Description: Experimenting with Socket.io
 *
-* TODO: #users rimuovi user quando quit, also array di users nel server
+* TODO: remove user on frontend list when he quits
+*		broadcast the usernames
+*		do the canvas stuff
 *
 */
 
