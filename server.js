@@ -28,7 +28,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8120);	//8739	8120
+server.listen(8080);
 
 var socket = io.listen(server),
 	total = 0,
