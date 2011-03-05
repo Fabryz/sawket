@@ -5,6 +5,8 @@
 * TODO: remove user on frontend list when he quits
 *		broadcast the usernames
 *		do the canvas stuff
+*		improve history messages
+*		double nicks
 *
 */
 
@@ -75,7 +77,7 @@ socket.on('connection', function(client) {
 			history.push({ username: username, msg: data });
 		}
 				
-		console.log(JSON.stringify({ username: username, msg: data, x: x, y: y}));	
+		console.log(JSON.stringify({ username: username, msg: data, x: x, y: y}));
 		
 		var action = data.split(" ");	
 		switch (action[0]) {
@@ -86,10 +88,13 @@ socket.on('connection', function(client) {
 						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected.', msg_type: 'info' }));
 				break;
 			case '/nick':
-					if (action[1] != '') {
-						socket.broadcast(JSON.stringify({ msg: '"'+ username +'" is now known as "'+ action[1] +'".', msg_type: 'event' }));
+					if ((typeof action[1] != "undefined") && (action[1] != '')) {
+						var old_username = username;
 						username = action[1];
-					} else
+						
+						console.log("- "+ old_username +" is now known as "+ username+ ".");
+						socket.broadcast(JSON.stringify({ msg: '"'+ old_username +'" is now known as "'+ username +'".', msg_type: 'event' }));
+					} else 
 						return;
 				break;
 				
