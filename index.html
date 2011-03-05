@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Sawket sandbox</title>
+    
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+    <script src="./socket.io/socket.io.js"></script>
+    
+    <script type="text/javascript">
+		$(document).ready(function() {		
+			var socket = new io.Socket('localhost', {port: 80}),
+				log = $("#log ul"),
+				users = $("#users ul"),
+				text = $("#text"),
+				canvas = $("#canvas");
+				
+			ctx = canvas[0].getContext('2d');
+			ctx.font = "15px monospace";
+			
+			socket.connect();
+			text.focus();
+			
+			socket.on('connect', function() {
+			  	log.append('<li>* Connected to the chat!</li>');
+			  	log.append('<li>* Input your username to partecipate, or just stare at the screen to lurk.</li>');		  	
+			});
+			
+			socket.on('disconnect', function() {
+				log.append('<li>* Disconnected from the chat.</li>');
+			});
+			
+			socket.on('message', function(data) {
+				var data = JSON.parse(data);
+				
+				switch (data.msg_type) {
+					case 'userjoin':
+							users.append('<li>'+ data.username +'</li>');
+						break;
+					case 'userquit':	//WIP
+							var appo = users.find(data.msg);
+							appo.remove();
+						break;
+					case 'userlist':
+							data.msg.forEach(function(m) {
+								users.append('<li>'+ m.username +'</li>');
+							});
+						break;
+					case 'info':
+							log.append('<li>'+ data.msg +'</li>');
+						break;
+			
+					default:
+						log.append('<li>&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
+					break;
+				}				
+				
+				clearCanvas();
+				ctx.fillRect(10, data.y, data.x, data.y + 5 );
+				$('#log').attr('scrollTop', $('#log').attr('scrollHeight'));
+			});		
+			
+			text.keyup(function(e) {
+				if (e.keyCode == 13) {
+					socket.send(text.val());
+					text.attr('value', '');
+					text.focus();
+				}
+			});
+		});
+		
+		function clearCanvas() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+		}
+    </script>
+    <style>
+    	body {
+    		background-color: #F5F5F5 ;
+    	}
+    
+    	#canvas {
+    		display: block;
+    		margin: 20px auto;
+    		border: 3px solid rgb(200, 0, 0);   
+    		background-color: #FEFEFE; 	
+    	}
+    	
+    	#text {
+    		border: 1px solid #CCC;
+    		width: 100%;
+    		height: 20px;
+    		font-size: 18px;
+    		font-family: "Lucida Sans", sans-serif;
+    	}
+    	
+    	#log,
+    	#users {
+    		font-family: "Lucida Sans", sans-serif;
+    		background-color: #FFFFDD;
+    		border-top: 2px solid #E3E3E3;
+    		padding: 5px 0;
+    		height: 200px;
+    		overflow: scroll;
+    		float: left;
+    	}
+    	
+    	#log {
+    		width: 80%;
+    	}
+    	
+    	#users {
+    		width: 20%;
+    	}
+    	
+    	#log ul,
+    	#users ul {
+    		list-style-type: none;
+    		margin-left: 10px;
+    		padding: 0;
+    	}
+    	
+    	.clearer {
+    		clear: both;
+    	}
+    </style>
+</head>
+<body>
+	<h1>Sawket</h1>
+	<p>Simple Node.js + Socket.io chat.</p>
+  	<canvas id="canvas" width="500" height="200"></canvas>
+	<div id="log"><ul></ul></div>
+	<div id="users"><ul></ul></div>
+	<input type="text" id="text" name="text" value="" />
+</body>
+</html>
