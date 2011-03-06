@@ -9,7 +9,7 @@
 *		add timestamps
 *		check that username has no spaces
 *		desktop/page title notification on new message
-*		broadcast userlist to lurkers/changenick/quit
+*		max length on username (and message?)
 *
 */
 
@@ -33,7 +33,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8756);	//8756
+server.listen(8765);	//8765
 
 var socket = io.listen(server),
 	total = 0,
