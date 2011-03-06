@@ -2,14 +2,14 @@
 <html>
 <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-    <title>Sawket sandbox</title>
+    <title>Sawket chat</title>
     
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
     <script src="./socket.io/socket.io.js"></script>
     
     <script type="text/javascript">
 		$(document).ready(function() {		
-			var socket = new io.Socket(null, {port: 80, rememberTransport: false}),
+			var socket = new io.Socket(null, {port: 8080, rememberTransport: false}),
 				log = $("#log ul"),
 				users = $("#users ul"),
 				text = $("#text"),
@@ -143,8 +143,8 @@
     </style>
 </head>
 <body>
-	<h1>Sawket sandbox</h1>
-	<p>Simple Node.js + Socket.io chat, fork me on <a href="https://github.com/Fabryz/sawket" title="Fork me!">GitHub></a>.</p>
+	<h1>Sawket chat</h1>
+	<p>Node.js + Socket.io chat with some nice features, fork me on <a href="https://github.com/Fabryz/sawket" title="Fork me!">GitHub</a>.</p>
   	<canvas id="canvas" width="500" height="200"></canvas>
 	<div id="log"><ul></ul></div>
 	<div id="users"><ul></ul></div>
