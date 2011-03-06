@@ -4,17 +4,17 @@
 *	See the README.md for usage and license
 *
 * TODO:
-*		sort the userlist alphabetically
 *		add timestamps
-*		check that username has no spaces
 *		max length on username (and message?)
 *		sendUserlist socket/client on lurker join/quit
+*		disable action comm for usernames (lurker can do /who?)
 *
 *		do canvas experiments
 *		remove action messages from history?
 *		desktop/page title notification on new message
-*		check odd behaviour on page refresh
 *		sound on join/quit?
+*		/help with all action commands
+*		understand if you're lurking from UI
 *
 */
 
@@ -46,11 +46,12 @@ var socket = io.listen(server),
 	conn = {},
 	history = [],
 	history_length = 5,
-	id = 0,
+	last_id = 0,
 	y = 0;
 
 socket.on('connection', function(client) {
 	var username,
+		user_id,
 		x = 0;
 	
 	console.log('* Lurker connected');
@@ -59,22 +60,23 @@ socket.on('connection', function(client) {
 	sendUserlist(socket, conn);
 
 	client.on('message', function(data) {	
-		if (!username) {
-			id++;
+		if (!username) {	//from lurker2active
+			last_id++;
 			y += 10;
 			
 			if (data.indexOf(' ') >= 0) {
 				client.send(JSON.stringify({ msg: 'Your username cannot contain spaces. Choose another one.', msg_type: 'info' }));
 				return;
 			}
-			if (isDouble(conn, id, data)) {
+			if (isDouble(conn, last_id, data)) {
 				client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
-				id--;	//fix isDouble
+				last_id--;	//fix isDouble
 				return;
 			}
 			
 			username = data;
-			conn[id] = { "username": username };
+			user_id = last_id;
+			conn[user_id] = { "username": username };
 			total_active++;
 			
 			console.log('- "'+ username +'" is now partecipating');				
@@ -88,7 +90,7 @@ socket.on('connection', function(client) {
 				});
 			}
 			return;
-		}	
+		}				//end lurker2active
 		
 		x+= 5;
 		
@@ -99,7 +101,7 @@ socket.on('connection', function(client) {
 			history.push({ username: username, msg: data });
 		}
 				
-		console.log(JSON.stringify({ username: username, msg: data, x: x, y: y}));
+		console.log(JSON.stringify({ id: user_id, username: username, msg: data, x: x, y: y}));
 		
 		var action = data.split(" ");	
 		switch (action[0]) {
@@ -108,16 +110,19 @@ socket.on('connection', function(client) {
 						client.send(JSON.stringify({ msg: 'You are forever alone.', msg_type: 'info' }));
 					else
 						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected: '+ total_active +' active, '+ (total-total_active) +' lurker'+ (total-total_active == 1?'':'s') +'.', msg_type: 'info' }));
+						
+					console.log(JSON.stringify(conn));
 				break;
 			case '/nick':
 					if ((typeof action[1] != "undefined") && (action[1] != '')) {
-						if (!isDouble(conn, id, action[1])) {
+						if (!isDouble(conn, user_id, action[1])) {
 							var old_username = username;
 							username = action[1];
 							
 							for (var c in conn) {
-								if (conn[c].username == old_username) {
-									conn[c].username = username;	//return?
+								if (conn[c].username == old_username) {	//doublecheck with id?
+									conn[c].username = username;
+									break;
 								}
 							}
 						
@@ -140,7 +145,7 @@ socket.on('connection', function(client) {
 
 	client.on('disconnect', function() {
 		if (username) {				
-			delete conn[id];
+			delete conn[user_id];
 			total_active--;
 			
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userquit' }));
@@ -166,10 +171,12 @@ function isDouble(conn, id, username) {
 
 function sendUserlist(socket, conn) {
 	var userlist = [];
-	
 	for (var c in conn) {
 		userlist.push(conn[c].username);
 	}
+	
+	userlist.sort();
+	
 	console.log("Userlist: "+ userlist);
 	socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
 }
