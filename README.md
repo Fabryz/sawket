@@ -24,6 +24,7 @@ What to do
 
 4- Chat, lurk and do a barrel roll
 
+A temporary working application is hosted on: http://sahket.nodester.com/
 
 Features
 --------
@@ -31,8 +32,8 @@ Features
 * Normal users and lurkers
 * Event and action messages
 	* Join/quit
-	* Number of connected users
-	* Nick change
+	* Number of connected users (/who)
+	* Nick change (/nick newusername)
 * 5 slots message history
 * Users list
 
