@@ -4,14 +4,16 @@
 *	See the README.md for usage and license
 *
 * TODO:
-*		do the canvas stuff
-*		improve history messages
 *		sort the userlist alphabetically
 *		add timestamps
 *		check that username has no spaces
-*		desktop/page title notification on new message
 *		max length on username (and message?)
-*		odd behaviour on page refresh
+*		sendUserlist socket/client on lurker join/quit
+*
+*		do canvas experiments
+*		remove action messages from history?
+*		desktop/page title notification on new message
+*		check odd behaviour on page refresh
 *		sound on join/quit?
 *
 */
@@ -43,6 +45,7 @@ var socket = io.listen(server),
 	total_active = 0,
 	conn = {},
 	history = [],
+	history_length = 5,
 	id = 0,
 	y = 0;
 
@@ -57,17 +60,22 @@ socket.on('connection', function(client) {
 
 	client.on('message', function(data) {	
 		if (!username) {
-			total_active++;
 			id++;
 			y += 10;
 			
+			if (data.indexOf(' ') >= 0) {
+				client.send(JSON.stringify({ msg: 'Your username cannot contain spaces. Choose another one.', msg_type: 'info' }));
+				return;
+			}
 			if (isDouble(conn, id, data)) {
 				client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
+				id--;	//fix isDouble
 				return;
 			}
 			
 			username = data;
 			conn[id] = { "username": username };
+			total_active++;
 			
 			console.log('- "'+ username +'" is now partecipating');				
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userjoin' }));
@@ -84,7 +92,7 @@ socket.on('connection', function(client) {
 		
 		x+= 5;
 		
-		if ((history.length < 5))
+		if ((history.length < history_length))
 			history.push({ username: username, msg: data });
 		else {
 			history.splice(0, 1);
@@ -99,7 +107,7 @@ socket.on('connection', function(client) {
 					if (total == 1)
 						client.send(JSON.stringify({ msg: 'You are forever alone.', msg_type: 'info' }));
 					else
-						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected: '+ total_active +' active, '+ (total-total_active) +' lurkers.', msg_type: 'info' }));
+						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected: '+ total_active +' active, '+ (total-total_active) +' lurker'+ (total-total_active == 1?'':'s') +'.', msg_type: 'info' }));
 				break;
 			case '/nick':
 					if ((typeof action[1] != "undefined") && (action[1] != '')) {
