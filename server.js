@@ -1,6 +1,6 @@
 /*
 *	Author: Fabrizio Codello
-*	Description: Experimenting with Socket.io, chat lobby	
+*	Description: Experimenting with Node.js + Socket.io: chat lobby	
 *	See the README.md for usage and license
 *
 * TODO:
@@ -11,6 +11,8 @@
 *		check that username has no spaces
 *		desktop/page title notification on new message
 *		max length on username (and message?)
+*		odd behaviour on page refresh
+*		sound on join/quit?
 *
 */
 
@@ -34,14 +36,15 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
-	total = 0,
-	y = 0,
+	total = 0
+	total_active = 0,
 	conn = {},
+	history = [],
 	id = 0,
-	history = [];
+	y = 0;
 
 socket.on('connection', function(client) {
 	var username,
@@ -54,6 +57,7 @@ socket.on('connection', function(client) {
 
 	client.on('message', function(data) {	
 		if (!username) {
+			total_active++;
 			id++;
 			y += 10;
 			
@@ -95,7 +99,7 @@ socket.on('connection', function(client) {
 					if (total == 1)
 						client.send(JSON.stringify({ msg: 'You are forever alone.', msg_type: 'info' }));
 					else
-						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected.', msg_type: 'info' }));
+						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected: '+ total_active +' active, '+ (total-total_active) +' lurkers.', msg_type: 'info' }));
 				break;
 			case '/nick':
 					if ((typeof action[1] != "undefined") && (action[1] != '')) {
@@ -127,13 +131,10 @@ socket.on('connection', function(client) {
 	});
 
 	client.on('disconnect', function() {
-		if (username) {
-			console.log("before "+ JSON.stringify(conn));
-						
+		if (username) {				
 			delete conn[id];
+			total_active--;
 			
-			console.log("after "+ JSON.stringify(conn));
-						
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userquit' }));
 			console.log('* '+ username +' disconnected');
 			
@@ -161,6 +162,6 @@ function sendUserlist(socket, conn) {
 	for (var c in conn) {
 		userlist.push(conn[c].username);
 	}
-	console.log("userlist: "+ userlist +" length: "+ conn.length);
+	console.log("Userlist: "+ userlist);
 	socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
 }
