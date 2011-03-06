@@ -3,7 +3,8 @@
 *	Description: Experimenting with Socket.io, chat lobby	
 *	See the README.md for usage and license
 *
-* TODO: do the canvas stuff
+* TODO:
+*		do the canvas stuff
 *		improve history messages
 *		sort the userlist alphabetically
 *		add timestamps
@@ -33,7 +34,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
 	total = 0,
