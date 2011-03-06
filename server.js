@@ -3,10 +3,8 @@
 * Description: Experimenting with Socket.io
 *
 * TODO: remove user on frontend list when he quits
-*		broadcast the usernames
 *		do the canvas stuff
 *		improve history messages
-*		double nicks
 *
 */
 
@@ -48,17 +46,28 @@ socket.on('connection', function(client) {
 
 	client.on('message', function(data) {	
 		if (!username) {
-			username = data;
 			id++;
 			y += 10;
-			conn.push({ id: id,
-						username: username,
-						//socket: socket,
-						x: x, y: y });
+						
+			
+			if (isDouble(conn, id, data)) {
+				client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
+				return;
+			}
+			
+			username = data;
+			conn.push({ "id": id, "username": username });
 			
 			console.log('- '+ username +' is now partecipating');				
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userjoin' }));
-			socket.broadcast(JSON.stringify({ msg: conn.toString(), msg_type: 'userlist' }));
+			
+			var userlist = [];
+			conn.forEach(function(c) {
+				userlist.push(c.username);
+			});
+			
+			console.log("userlist: "+ userlist);
+			socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
 			
 			if (history.length > 0) {
 				history.forEach(function(h) {
@@ -89,11 +98,16 @@ socket.on('connection', function(client) {
 				break;
 			case '/nick':
 					if ((typeof action[1] != "undefined") && (action[1] != '')) {
-						var old_username = username;
-						username = action[1];
+						if (!isDouble(conn, id, action[1])) {
+							var old_username = username;
+							username = action[1];
 						
-						console.log("- "+ old_username +" is now known as "+ username+ ".");
-						socket.broadcast(JSON.stringify({ msg: '"'+ old_username +'" is now known as "'+ username +'".', msg_type: 'event' }));
+							console.log("- "+ old_username +" is now known as "+ username+ ".");
+							socket.broadcast(JSON.stringify({ msg: '"'+ old_username +'" is now known as "'+ username +'".', msg_type: 'event' }));
+						} else {
+							client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
+							return;
+						}
 					} else 
 						return;
 				break;
@@ -106,14 +120,41 @@ socket.on('connection', function(client) {
 
 	client.on('disconnect', function() {
 		if (username) {
-			var pos = conn.indexOf(socket);	//WIP
-			if (pos>=0)
-				conn.splice(pos, 1);
+			console.log(conn);
 			
+			conn.forEach(function(c) {
+				if (c.username == username) {
+					console.log('WHY CANT YOU GET DELETED');
+				}
+					
+			});
+			
+			console.log(conn);
+						
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userquit' }));
 			console.log('* '+ username +' disconnected');
+			
+			var userlist = [];
+			conn.forEach(function(c) {
+				userlist.push(c.username);
+			});
+			
+			console.log(userlist);
+			socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
 		} else
 			console.log('* Lurker disconnected');
 		total--;
 	});
 });
+
+function isDouble(conn, id, username) {
+	var isdouble = false;
+
+	conn.forEach(function(c) {
+		if ((c.username == username) && (c.id != id)) {
+			isdouble = true;
+			return;
+		}
+	});
+	return isdouble;
+}

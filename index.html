@@ -35,18 +35,18 @@
 				
 				switch (data.msg_type) {
 					case 'userjoin':
-							log.append('<li><strong>* "'+ data.username +'" is now partecipating.</strong></li>');
-							users.append('<li>'+ data.username +'</li>');
+							log.append('<li><strong>&raquo; "'+ data.username +'" is now partecipating.</strong></li>');
 						break;
 					case 'userquit':
-							log.append('<li><strong>* "'+ data.username +'" has left the chat.</strong></li>');
+							log.append('<li><strong>&laquo; "'+ data.username +'" has left the chat.</strong></li>');
 							
 							var appo = users.find(data.msg);
 							appo.remove();
 						break;
 					case 'userlist':
+							users.html('');
 							data.users.forEach(function(m) {
-								users.append('<li>'+ m.username +'</li>');
+								users.append('<li>'+ m +'</li>');
 							});
 						break;
 					case 'info':
