@@ -24,7 +24,7 @@ What to do
 
 4- Chat, lurk and do a barrel roll
 
-A temporary working application is hosted on: http://sawket.nodester.com/
+A temporary working application is hosted on: [sawket.nodester.com](http://sawket.nodester.com/)
 
 Features
 --------
