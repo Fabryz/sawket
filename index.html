@@ -9,7 +9,7 @@
     
     <script type="text/javascript">
 		$(document).ready(function() {		
-			var socket = new io.Socket(null, {port: 80, rememberTransport: false}),
+			var socket = new io.Socket(null, {port: 8080, rememberTransport: false}),
 				log = $("#log ul"),
 				users = $("#users ul"),
 				text = $("#text"),
@@ -70,7 +70,7 @@
 			});		
 			
 			text.keyup(function(e) {
-				if (e.keyCode == 13) {
+				if ((e.keyCode == 13) && (text.val() != '')) {
 					socket.send(text.val());
 					text.attr('value', '');
 					text.focus();
@@ -146,8 +146,11 @@
 	<h1>Sawket chat</h1>
 	<p>Node.js + Socket.io chat with some nice features, fork me on <a href="https://github.com/Fabryz/sawket" title="Fork me!">GitHub</a>.</p>
   	<canvas id="canvas" width="500" height="200"></canvas>
-	<div id="log"><ul></ul></div>
-	<div id="users"><ul></ul></div>
-	<input type="text" id="text" name="text" value="" />
+  	<div id="chat">
+		<div id="log"><ul></ul></div>
+		<div id="users"><ul></ul></div>
+		<input type="text" id="text" name="text" value="" />
+		<div class="clearer"></div>
+	</div>
 </body>
 </html>
