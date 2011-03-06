@@ -33,7 +33,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8080);	//8756
+server.listen(8756);	//8756
 
 var socket = io.listen(server),
 	total = 0,
