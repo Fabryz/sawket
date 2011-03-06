@@ -1,10 +1,15 @@
 /*
-* Author: Fabrizio Codello
-* Description: Experimenting with Socket.io
+*	Author: Fabrizio Codello
+*	Description: Experimenting with Socket.io, chat lobby	
+*	See the README.md for usage and license
 *
-* TODO: remove user on frontend list when he quits
-*		do the canvas stuff
+* TODO: do the canvas stuff
 *		improve history messages
+*		sort the userlist alphabetically
+*		add timestamps
+*		check that username has no spaces
+*		desktop/page title notification on new message
+*		broadcast userlist to lurkers/changenick/quit
 *
 */
 
@@ -28,12 +33,12 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8756);
+server.listen(8080);	//8756
 
 var socket = io.listen(server),
 	total = 0,
 	y = 0,
-	conn = [],
+	conn = {},
 	id = 0,
 	history = [];
 
@@ -43,12 +48,13 @@ socket.on('connection', function(client) {
 	
 	console.log('* Lurker connected');
 	total++;
+	
+	sendUserlist(socket, conn);
 
 	client.on('message', function(data) {	
 		if (!username) {
 			id++;
 			y += 10;
-						
 			
 			if (isDouble(conn, id, data)) {
 				client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
@@ -56,18 +62,12 @@ socket.on('connection', function(client) {
 			}
 			
 			username = data;
-			conn.push({ "id": id, "username": username });
+			conn[id] = { "username": username };
 			
-			console.log('- '+ username +' is now partecipating');				
+			console.log('- "'+ username +'" is now partecipating');				
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userjoin' }));
 			
-			var userlist = [];
-			conn.forEach(function(c) {
-				userlist.push(c.username);
-			});
-			
-			console.log("userlist: "+ userlist);
-			socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
+			sendUserlist(socket, conn);
 			
 			if (history.length > 0) {
 				history.forEach(function(h) {
@@ -101,9 +101,16 @@ socket.on('connection', function(client) {
 						if (!isDouble(conn, id, action[1])) {
 							var old_username = username;
 							username = action[1];
+							
+							for (var c in conn) {
+								if (conn[c].username == old_username) {
+									conn[c].username = username;	//return?
+								}
+							}
 						
 							console.log("- "+ old_username +" is now known as "+ username+ ".");
 							socket.broadcast(JSON.stringify({ msg: '"'+ old_username +'" is now known as "'+ username +'".', msg_type: 'event' }));
+							sendUserlist(socket, conn);
 						} else {
 							client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
 							return;
@@ -120,41 +127,39 @@ socket.on('connection', function(client) {
 
 	client.on('disconnect', function() {
 		if (username) {
-			console.log(conn);
+			console.log("before "+ JSON.stringify(conn));
+						
+			delete conn[id];
 			
-			conn.forEach(function(c) {
-				if (c.username == username) {
-					console.log('WHY CANT YOU GET DELETED');
-				}
-					
-			});
-			
-			console.log(conn);
+			console.log("after "+ JSON.stringify(conn));
 						
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userquit' }));
 			console.log('* '+ username +' disconnected');
 			
-			var userlist = [];
-			conn.forEach(function(c) {
-				userlist.push(c.username);
-			});
-			
-			console.log(userlist);
-			socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
+			sendUserlist(socket, conn);
 		} else
 			console.log('* Lurker disconnected');
+		
 		total--;
 	});
 });
 
-function isDouble(conn, id, username) {
-	var isdouble = false;
-
-	conn.forEach(function(c) {
-		if ((c.username == username) && (c.id != id)) {
-			isdouble = true;
-			return;
+function isDouble(conn, id, username) {	
+	for (var c in conn) {
+		if ((conn[c].username == username) && (c != id)) {
+			return true;
 		}
-	});
-	return isdouble;
+	}
+	
+	return false;
+}
+
+function sendUserlist(socket, conn) {
+	var userlist = [];
+	
+	for (var c in conn) {
+		userlist.push(conn[c].username);
+	}
+	console.log("userlist: "+ userlist +" length: "+ conn.length);
+	socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
 }
