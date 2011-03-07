@@ -38,7 +38,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
 	total = 0
@@ -60,12 +60,16 @@ socket.on('connection', function(client) {
 	sendUserlist(socket, conn);
 
 	client.on('message', function(data) {	
+		if (!data)
+			return;
+	
 		if (!username) {	//from lurker2active
 			last_id++;
 			y += 10;
 			
 			if (data.indexOf(' ') >= 0) {
 				client.send(JSON.stringify({ msg: 'Your username cannot contain spaces. Choose another one.', msg_type: 'info' }));
+				last_id--;
 				return;
 			}
 			if (isDouble(conn, last_id, data)) {
@@ -174,9 +178,7 @@ function sendUserlist(socket, conn) {
 	for (var c in conn) {
 		userlist.push(conn[c].username);
 	}
-	
 	userlist.sort();
 	
-	console.log("Userlist: "+ userlist);
 	socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
 }
