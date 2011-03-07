@@ -1,18 +1,19 @@
 /*
 *	Author: Fabrizio Codello
-*	Description: Experimenting with Node.js + Socket.io: chat lobby	
+*	Description: Node.js + Socket.io chat with some nice features
 *	See the README.md for usage and license
 *
 * TODO:
 *		add timestamps
-*		max length on username (and message?)
+*		max length on message, 512
 *		sendUserlist socket/client on lurker join/quit
 *		disable action comm for usernames (lurker can do /who?)
+*		fix id on isDouble
 *
 *		do canvas experiments
 *		remove action messages from history?
 *		desktop/page title notification on new message
-*		sound on join/quit?
+*		sound on join/quit/newmessage?
 *		/help with all action commands
 *		understand if you're lurking from UI
 *		daily chatlogs?
@@ -39,7 +40,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
 	total = 0
@@ -61,28 +62,20 @@ socket.on('connection', function(client) {
 	sendUserlist(socket, conn);
 
 	client.on('message', function(data) {	
-		if (!data)
+		if (!data)	//discard empty messages
 			return;
 	
-		if (!username) {	//from lurker2active
+		if (!username) {	//lurker2active
+		
+			if (!checkUsername(client, conn, last_id+1, data))
+				return;
+			
 			last_id++;
-			y += 10;
-			
-			if (data.indexOf(' ') >= 0) {
-				client.send(JSON.stringify({ msg: 'Your username cannot contain spaces. Choose another one.', msg_type: 'info' }));
-				last_id--;
-				return;
-			}
-			if (isDouble(conn, last_id, data)) {
-				client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
-				last_id--;	//fix isDouble
-				return;
-			}
-			
 			username = data;
 			user_id = last_id;
 			conn[user_id] = { "username": username };
 			total_active++;
+			y += 10;
 			
 			console.log('- "'+ username +'" is now partecipating');				
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userjoin' }));
@@ -106,7 +99,7 @@ socket.on('connection', function(client) {
 			history.push({ username: username, msg: data });
 		}
 				
-		console.log(JSON.stringify({ id: user_id, username: username, msg: data, x: x, y: y}));
+		console.log(JSON.stringify({ id: user_id, username: username, msg: data, x: x, y: y}));	//debug
 		
 		var action = data.split(" ");	
 		switch (action[0]) {
@@ -116,28 +109,20 @@ socket.on('connection', function(client) {
 					else
 						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected: '+ total_active +' active, '+ (total-total_active) +' lurker'+ (total-total_active == 1?'':'s') +'.', msg_type: 'info' }));
 						
-					console.log(JSON.stringify(conn));
+					console.log(JSON.stringify(conn));	//debug
 				break;
 			case '/nick':
 					if ((typeof action[1] != "undefined") && (action[1] != '')) {
-						if (!isDouble(conn, user_id, action[1])) {
+						if (checkUsername(client, conn, user_id, action[1])) {
 							var old_username = username;
-							username = action[1];
-							
-							for (var c in conn) {
-								if (conn[c].username == old_username) {	//doublecheck with id?
-									conn[c].username = username;
-									break;
-								}
-							}
+							username = action[1];							
+							conn[user_id].username = username;
 						
 							console.log("- "+ old_username +" is now known as "+ username+ ".");
 							socket.broadcast(JSON.stringify({ msg: '"'+ old_username +'" is now known as "'+ username +'".', msg_type: 'event' }));
 							sendUserlist(socket, conn);
-						} else {
-							client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
+						} else
 							return;
-						}
 					} else 
 						return;
 				break;
@@ -164,16 +149,17 @@ socket.on('connection', function(client) {
 	});
 });
 
-function isDouble(conn, id, username) {	
+//Check if username is already being used
+function isDouble(conn, user_id, username) {	//fix id not required on lurker2active
 	for (var c in conn) {
-		if ((conn[c].username == username) && (c != id)) {
+		if ((conn[c].username == username) && (c != user_id)) {
 			return true;
 		}
 	}
-	
 	return false;
 }
 
+//Send the whole userlist, sorted alphabetically
 function sendUserlist(socket, conn) {
 	var userlist = [];
 	for (var c in conn) {
@@ -182,4 +168,25 @@ function sendUserlist(socket, conn) {
 	userlist.sort();
 	
 	socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
+}
+
+//Check that 3 <= username <= 16, has no spaces, is not already being used
+function checkUsername(client, conn, user_id, data) {
+	if ((data.length < 3) || (data.length > 16)) {
+		client.send(JSON.stringify({ msg: 'Your username length must be minimum 3 and maximum 16 chars. Choose another one.', msg_type: 'info' }));
+		return false;
+	}			
+	if (data.indexOf(' ') >= 0) {
+		client.send(JSON.stringify({ msg: 'Your username cannot contain spaces. Choose another one.', msg_type: 'info' }));
+		return false;
+	}
+	if (total_active > 0) {
+	console.log(total+ ":" +total_active);
+		if (isDouble(conn, user_id, data)) {
+			client.send(JSON.stringify({ msg: 'That username is already being used. Choose another one.', msg_type: 'info' }));
+			return false;
+		}
+	}
+	
+	return true;
 }
