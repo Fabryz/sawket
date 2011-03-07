@@ -25,7 +25,7 @@ What to do
 
 4- Chat, lurk and do a barrel roll
 
-A temporary working application is hosted on: [sawket.nodester.com](http://sawket.nodester.com/)
+A working application is hosted on: [sawket.nodester.com](http://sawket.nodester.com/)
 
 Features
 --------
@@ -37,6 +37,7 @@ Features
 	* Nick change (/nick newusername)
 * 5 slots message history
 * Users list
+* Style it as you want via CSS
 
 License
 -------
