@@ -9,7 +9,7 @@
     
     <script type="text/javascript">
 		$(document).ready(function() {		
-			var socket = new io.Socket(null, {port: 80, rememberTransport: false}),
+			var socket = new io.Socket(null, {port: 8080, rememberTransport: false}),
 				log = $("#log ul"),
 				users = $("#users ul"),
 				text = $("#text"),
@@ -22,12 +22,12 @@
 			ctx.font = "15px monospace";
 			
 			socket.on('connect', function() {
-			  	log.append('<li>* Connected to the chat!</li>');
+			  	log.append('<li class="connect">* Connected to the chat!</li>');
 			  	log.append('<li>* Input your username to partecipate, or just stare at the screen to lurk.</li>');		  	
 			});
 			
 			socket.on('disconnect', function() {
-				log.append('<li>* Disconnected from the chat.</li>');
+				log.append('<li class="disconnect">* Disconnected from the chat.</li>');
 			});
 			
 			socket.on('message', function(data) {
@@ -35,22 +35,19 @@
 				
 				switch (data.msg_type) {
 					case 'userjoin':
-							log.append('<li><strong>&raquo; "'+ data.username +'" is now partecipating.</strong></li>');
+							log.append('<li class="userjoin">&raquo; "'+ data.username +'" is now partecipating.</li>');
 						break;
 					case 'userquit':
-							log.append('<li><strong>&laquo; "'+ data.username +'" has left the chat.</strong></li>');
-							
-							var appo = users.find(data.msg);
-							appo.remove();
+							log.append('<li class="userquit">&laquo; "'+ data.username +'" has left the chat.</li>');
 						break;
 					case 'userlist':
 							users.html('');
-							data.users.forEach(function(m) {
-								users.append('<li>'+ m +'</li>');
+							data.users.forEach(function(user) {
+								users.append('<li class="user">'+ user +'</li>');
 							});
 						break;
 					case 'info':
-							log.append('<li>* '+ data.msg +'</li>');
+							log.append('<li class="info">* '+ data.msg +'</li>');
 						break;
 					case 'event':
 							log.append('<li class="event">* '+ data.msg +'</li>');
@@ -60,7 +57,7 @@
 						break;
 			
 					default:
-							log.append('<li>&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
+							log.append('<li class="message">&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
 						break;
 				}				
 				
@@ -126,6 +123,11 @@
     		list-style-type: none;
     		margin-left: 10px;
     		padding: 0;
+    	}
+    	
+    	#log .userjoin,
+    	#log .userquit {
+    		font-weight: bold;
     	}
     	
     	#log .history {
