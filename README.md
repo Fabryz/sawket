@@ -1,7 +1,8 @@
 Sawket
 ======
 
-Experimenting with a Node.js + Socket.io, the chat lobby will maybe be used on my [Wander game](https://github.com/Fabryz/wander)
+A Node.js + Socket.io chat with some nice features.
+It will maybe be used on my [Wander game](https://github.com/Fabryz/wander), so I'm also experimenting with HTML5 Canvas.
 
 Requirements
 ------------
