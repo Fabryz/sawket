@@ -4,14 +4,12 @@
 *	See the README.md for usage and license
 *
 * TODO:
-*		add timestamps
 *		max length on message, 512
 *		sendUserlist socket/client on lurker join/quit
 *		disable action comm for usernames (lurker can do /who?)
 *		fix id on isDouble
 *
 *		do canvas experiments
-*		remove action messages from history?
 *		desktop/page title notification on new message
 *		sound on join/quit/newmessage?
 *		/help with all action commands
@@ -40,14 +38,14 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
 	total = 0
 	total_active = 0,
 	conn = {},
 	history = [],
-	history_length = 5,
+	history_max_length = 5,
 	last_id = 0,
 	y = 0;
 
@@ -84,22 +82,16 @@ socket.on('connection', function(client) {
 			
 			if (history.length > 0) {
 				history.forEach(function(h) {
-					client.send(JSON.stringify({ username: h.username, msg: h.msg, msg_type: 'history'}));
+					client.send(JSON.stringify({ time: h.time, username: h.username, msg: h.msg, msg_type: 'history'}));
 				});
 			}
 			return;
 		}				//end lurker2active
 		
 		x+= 5;
-		
-		if ((history.length < history_length))
-			history.push({ username: username, msg: data });
-		else {
-			history.splice(0, 1);
-			history.push({ username: username, msg: data });
-		}
-				
-		console.log(JSON.stringify({ id: user_id, username: username, msg: data, x: x, y: y}));	//debug
+						
+		var time = new Date();
+		console.log(JSON.stringify({ id: user_id, time: dateString(time), username: username, msg: data, x: x, y: y}));	//debug
 		
 		var action = data.split(" ");	
 		switch (action[0]) {
@@ -128,7 +120,13 @@ socket.on('connection', function(client) {
 				break;
 				
 			default:
-				socket.broadcast(JSON.stringify({ username: username, msg: data, x: x, y: y, msg_type: 'message'}));
+				var time = new Date();
+				
+				if (history.length = history_max_length)
+					history.splice(0, 1);
+				history.push({ time: dateString(time), username: username, msg: data });
+				
+				socket.broadcast(JSON.stringify({ time: dateString(time), username: username, msg: data, x: x, y: y, msg_type: 'message'}));
 			break;
 		}
 	});
@@ -139,7 +137,7 @@ socket.on('connection', function(client) {
 			total_active--;
 			
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userquit' }));
-			console.log('* '+ username +' disconnected');
+			console.log('* "'+ username +'" disconnected');
 			
 			sendUserlist(socket, conn);
 		} else
@@ -189,4 +187,13 @@ function checkUsername(client, conn, user_id, data) {
 	}
 	
 	return true;
+}
+
+//Return the current time in hh:mm:ss format
+function dateString(d) {
+    function pad(n) {
+        return (n<10? '0'+n : n);
+    }
+    
+    return pad(d.getHours())+':'+ pad(d.getMinutes())+':'+ pad(d.getSeconds());
 }
