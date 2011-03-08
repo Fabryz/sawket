@@ -9,7 +9,7 @@
     
     <script type="text/javascript">
 		$(document).ready(function() {		
-			var socket = new io.Socket(null, {port: 80, rememberTransport: false}),
+			var socket = new io.Socket(null, {port: 8080, rememberTransport: false}),
 				log = $("#log ul"),
 				users = $("#users ul"),
 				text = $("#text"),
@@ -53,11 +53,11 @@
 							log.append('<li class="event">* '+ data.msg +'</li>');
 						break;
 					case 'history':
-							log.append('<li class="history">&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
+							log.append('<li class="history">['+ data.time +'] &lt;'+ data.username +'&gt; '+ data.msg +'</li>');
 						break;
 			
 					default:
-							log.append('<li class="message">&lt;'+ data.username +'&gt; '+ data.msg +'</li>');
+							log.append('<li class="message">['+ data.time +'] &lt;'+ data.username +'&gt; '+ data.msg +'</li>');
 						break;
 				}				
 				
