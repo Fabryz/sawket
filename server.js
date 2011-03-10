@@ -38,7 +38,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
 	total = 0
@@ -80,6 +80,7 @@ socket.on('connection', function(client) {
 			
 			console.log('- "'+ username +'" is now partecipating');				
 			socket.broadcast(JSON.stringify({ username: username, msg_type: 'userjoin' }));
+			client.send(JSON.stringify({ msg: 'Use "/help" to see all the available commands.', msg_type: 'info' }));
 			
 			sendUserlist(socket, conn);
 			
@@ -123,10 +124,16 @@ socket.on('connection', function(client) {
 					} else 
 						return;
 				break;
-				case '/time':
+			case '/time':
 					var time = new Date();
 					
 					client.send(JSON.stringify({ msg: 'Server time: '+ time +'.', msg_type: 'info' }));
+				break;
+			case '/help':
+					client.send(JSON.stringify({ msg: 'Sawket chat help section:', msg_type: 'info' }));
+					client.send(JSON.stringify({ msg: 'Use "/who" to see who\'s connected', msg_type: 'info' }));
+					client.send(JSON.stringify({ msg: 'Use "/nick newnick" to change your username', msg_type: 'info' }));
+					client.send(JSON.stringify({ msg: 'Use "/time" to see the server time', msg_type: 'info' }));
 				break;
 				
 			default:

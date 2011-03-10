@@ -31,11 +31,11 @@ Features
 --------
 
 * Normal users and lurkers
-* Event and action messages
+* Event and action messages (Use "/help" to see all the available commands)
 	* Join/quit
-	* Number of connected users (/who)
-	* Nick change (/nick newusername)
-	* Server time (/time)
+	* Number of connected users
+	* Nick change
+	* Server time
 * 5 slots message history
 * Users list
 * Style it as you want via CSS
