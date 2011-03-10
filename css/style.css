@@ -1,0 +1,94 @@
+body {
+	color: #000;
+	background-color: #F5F5F5 ;
+	font-size: 62.5%;
+	font-family: "Georgia", serif;
+	margin: 10px;
+}
+
+h1 {
+	font-size: 3.2em;
+	margin: .5em 0 1em 0;
+	font-weight: bold;
+}
+
+p,
+#log,
+#users {
+	font-size: 1.6em;
+}
+
+#canvas {
+	display: block;
+	margin: 20px auto;
+	border: 3px solid rgb(200, 0, 0);   
+	background-color: #FEFEFE; 	
+}
+
+#chat {
+	width: 100%;
+}
+    	
+#text {
+	font-family: "Lucida Sans", sans-serif;
+	font-size: 1.8em;
+	width: 100%;
+	height: 20px;
+	margin-top: 0;
+	border: 1px solid #CCC;
+	display: block;
+}
+
+#log,
+#users {
+	font-family: "Lucida Sans", sans-serif;
+	background-color: #FFFFDD;
+	border-top: 2px solid #E3E3E3;
+	padding: 15px 0;
+	height: 200px;
+	overflow: scroll;
+	float: left;
+}
+
+#log {
+	width: 80%;
+}
+
+#log li {
+	line-height: 20px;
+}
+
+#users {
+	width: 20%;
+}
+
+#log ul,
+#users ul {
+	list-style-type: none;
+	margin-left: 10px;
+	padding: 0;
+}
+
+#log .userjoin,
+#log .userquit {
+	font-weight: bold;
+}
+
+#log .history {
+	color: #555;
+	font-style: italic;
+}
+
+#log .event {
+	font-weight: bold;
+}
+    	
+#credits {
+	position: absolute;
+	right: 0px;
+	margin: 20px;
+}
+
+.clearer {
+	clear: both;
+}
