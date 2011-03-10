@@ -27,9 +27,21 @@ var http = require('http'),
 var server = http.createServer(function(req, res) {
   var path = url.parse(req.url).pathname;  
   
+  console.log("* HTTP request: "+ path);
+  
   switch (path) {
+	case '/css/reset.css':
+			res.writeHead(200, { 'Content-Type': 'text/css' });
+		    var rs = fs.createReadStream(__dirname + '/css/reset.css');
+		    sys.pump(rs, res);
+		break;
+	case '/css/style.css':
+			res.writeHead(200, { 'Content-Type': 'text/css' });
+		    var rs = fs.createReadStream(__dirname + '/css/style.css');
+		    sys.pump(rs, res);
+		break;
+
     default:
-    	console.log("* HTTP Connection.");
         res.writeHead(200, { 'Content-Type': 'text/html' });
         var rs = fs.createReadStream(__dirname + '/index.html');
         sys.pump(rs, res);
@@ -38,7 +50,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8080);	//8765
+server.listen(8080);
 
 var socket = io.listen(server),
 	total = 0
