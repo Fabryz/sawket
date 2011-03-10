@@ -7,6 +7,7 @@
 *		sendUserlist socket/client on lurker join/quit
 *		disable action comm for usernames (lurker can do /who?)
 *		fix id on isDouble
+*		X slots history on frontend input field
 *
 *		do canvas experiments
 *		desktop/page title notification on new message
@@ -37,7 +38,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
 	total = 0
@@ -121,6 +122,11 @@ socket.on('connection', function(client) {
 							return;
 					} else 
 						return;
+				break;
+				case '/time':
+					var time = new Date();
+					
+					client.send(JSON.stringify({ msg: 'Server time: '+ time +'.', msg_type: 'info' }));
 				break;
 				
 			default:

@@ -35,6 +35,7 @@ Features
 	* Join/quit
 	* Number of connected users (/who)
 	* Nick change (/nick newusername)
+	* Server time (/time)
 * 5 slots message history
 * Users list
 * Style it as you want via CSS
