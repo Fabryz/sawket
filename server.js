@@ -4,7 +4,6 @@
 *	See the README.md for usage and license
 *
 * TODO:
-*		max length on message, 512
 *		sendUserlist socket/client on lurker join/quit
 *		disable action comm for usernames (lurker can do /who?)
 *		fix id on isDouble
@@ -38,7 +37,7 @@ var server = http.createServer(function(req, res) {
   
 });
 
-server.listen(8765);	//8765
+server.listen(8080);	//8765
 
 var socket = io.listen(server),
 	total = 0
@@ -47,6 +46,7 @@ var socket = io.listen(server),
 	history = [],
 	history_max_length = 5,
 	last_id = 0,
+	data_max_length = 512,
 	y = 0;
 
 socket.on('connection', function(client) {
@@ -62,6 +62,8 @@ socket.on('connection', function(client) {
 	client.on('message', function(data) {	
 		if (!data)	//discard empty messages
 			return;
+		
+		data = data.substring(0, data_max_length);
 	
 		if (!username) {	//lurker2active
 		
@@ -101,7 +103,9 @@ socket.on('connection', function(client) {
 					else
 						client.send(JSON.stringify({ msg: 'There are '+ total +' users connected: '+ total_active +' active, '+ (total-total_active) +' lurker'+ (total-total_active == 1?'':'s') +'.', msg_type: 'info' }));
 						
-					console.log(JSON.stringify(conn));	//debug
+					//debug
+					console.log('* '+ total +' users connected: '+ total_active +' active, '+ (total-total_active) +' lurkers.');
+					console.log('* '+ JSON.stringify(conn));
 				break;
 			case '/nick':
 					if ((typeof action[1] != "undefined") && (action[1] != '')) {
