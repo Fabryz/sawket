@@ -9,7 +9,7 @@
     
     <script type="text/javascript">
 		$(document).ready(function() {		
-			var socket = new io.Socket(null, {port: 80, rememberTransport: false}),
+			var socket = new io.Socket(null, {port: 8080, rememberTransport: false}),
 				log = $("#log ul"),
 				users = $("#users ul"),
 				text = $("#text"),
@@ -138,6 +138,12 @@
     	#log .event {
     		font-weight: bold;
     	}
+    	    	
+    	#credits {
+    		position: absolute;
+    		right: 0px;
+    		margin: 20px;
+    	}
     	
     	.clearer {
     		clear: both;
@@ -154,5 +160,6 @@
 		<input type="text" id="text" name="text" value="" />
 		<div class="clearer"></div>
 	</div>
+	<div id="credits">Copyright &copy; 2011 Fabrizio Codello</div>
 </body>
 </html>
