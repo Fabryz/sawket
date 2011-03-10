@@ -8,11 +8,11 @@
 *		disable action comm for usernames (lurker can do /who?)
 *		fix id on isDouble
 *		X slots history on frontend input field
+*		modularize code
 *
 *		do canvas experiments
 *		desktop/page title notification on new message
 *		sound on join/quit/newmessage?
-*		/help with all action commands
 *		understand if you're lurking from UI
 *		daily chatlogs?
 *
@@ -58,7 +58,8 @@ socket.on('connection', function(client) {
 	console.log('* Lurker connected');
 	total++;
 	
-	sendUserlist(socket, conn);
+	if (total_active >= 1)
+		sendUserlist(socket, conn);
 
 	client.on('message', function(data) {	
 		if (!data)	//discard empty messages
@@ -181,7 +182,7 @@ function sendUserlist(socket, conn) {
 		userlist.push(conn[c].username);
 	}
 	userlist.sort();
-	
+
 	socket.broadcast(JSON.stringify({ users: userlist, msg_type: 'userlist' }));
 }
 
