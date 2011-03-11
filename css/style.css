@@ -3,6 +3,9 @@ body {
 	background-color: #F5F5F5 ;
 	font-size: 62.5%;
 	font-family: "Georgia", serif;
+}
+
+#wrapper {
 	margin: 10px;
 }
 
@@ -23,6 +26,11 @@ p,
 	margin: 20px auto;
 	border: 3px solid rgb(200, 0, 0);   
 	background-color: #FEFEFE; 	
+}
+
+#canvas,
+#canvas:active {
+	cursor: crosshair;
 }
 
 #chat {
@@ -54,7 +62,8 @@ p,
 	width: 80%;
 }
 
-#log li {
+#log li,
+#users li {
 	line-height: 20px;
 }
 

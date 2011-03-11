@@ -1,7 +1,7 @@
 Sawket
 ======
 
-A Node.js + Socket.io chat with some nice features.
+A Node.js + Socket.io Chat and sketchpad (experimental) with some nice features.
 It will maybe be used on my [Wander game](https://github.com/Fabryz/wander), so I'm also experimenting with HTML5 Canvas.
 
 Requirements
@@ -10,6 +10,7 @@ Requirements
 * Node.js
 * Npm
 * Socket.io
+* A browser that supports WebSockets/HTML5 Canvas
 
 Install Socket.io with:
 ``npm install socket.io``
@@ -23,13 +24,14 @@ What to do
 
 3- Point your browser to SERVER_IP:8080
 
-4- Chat, lurk and do a barrel roll
+4- Chat, draw, lurk and do a barrel roll
 
 A working application is hosted on: [sawket.nodester.com](http://sawket.nodester.com/)
 
 Features
 --------
 
+* Chat + Sketchpad
 * Normal users and lurkers
 * Event and action messages (Use "/help" to see all the available commands)
 	* Join/quit

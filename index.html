@@ -12,11 +12,20 @@
     
     <script type="text/javascript">
 		$(document).ready(function() {		
-			var socket = new io.Socket(null, {port: 80, rememberTransport: false}),
+			var socket = new io.Socket(null, {port: 8080, rememberTransport: false}),
 				log = $("#log ul"),
 				users = $("#users ul"),
 				text = $("#text"),
 				canvas = $("#canvas");
+				
+			/* testing */
+			
+			var clickX = new Array(),
+				clickY = new Array(),
+				clickDrag = new Array(),
+				paint;
+			
+			/* testing */
 				
 			socket.connect();
 			text.focus();
@@ -58,24 +67,87 @@
 					case 'history':
 							log.append('<li class="history">['+ data.time +'] &lt;'+ data.username +'&gt; '+ data.msg +'</li>');
 						break;
+					/* testing */
+					case 'draw': 
+							clickX.push(data.x);
+							clickY.push(data.y);
+							clickDrag.push(data.dragging);
+							redraw();
+						break;
+					/* testing */
 			
 					default:
 							log.append('<li class="message">['+ data.time +'] &lt;'+ data.username +'&gt; '+ data.msg +'</li>');
 						break;
 				}				
 				
-				clearCanvas();
-				ctx.fillRect(10, data.y, data.x, data.y + 5 );
 				$('#log').attr('scrollTop', $('#log').attr('scrollHeight'));
 			});		
 			
 			text.keyup(function(e) {
 				if ((e.keyCode == 13) && (text.val() != '')) {
-					socket.send(text.val());
+					socket.send(JSON.stringify({ msg_type: 'message', msg: text.val() }));
 					text.attr('value', '');
 					text.focus();
 				}
 			});
+			
+			/* testing */
+			
+			//ctx.canvas.width = window.innerWidth*0.9;
+			
+			canvas.mousedown(function(e){
+				var mouseX = e.pageX - this.offsetLeft;
+				var mouseY = e.pageY - this.offsetTop;
+
+				paint = true;
+				addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop);
+				//redraw();
+			});
+			
+			canvas.mousemove(function(e) {
+				if (paint) {
+					var xi = (e.pageX - this.offsetLeft),
+						yi = (e.pageY - this.offsetTop);
+			
+					addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop, true);
+					//redraw();
+				}
+			});
+			
+			canvas.mouseup(function(e) {
+				paint = false;
+			});
+			
+			canvas.mouseleave(function(e) {
+				paint = false;
+			});
+			
+			function addClick(x, y, dragging) {
+				socket.send(JSON.stringify({msg_type: 'canvas', x: x, y: y, dragging: dragging }));
+			}
+			
+			function redraw() {
+				clearCanvas();
+
+				ctx.strokeStyle = "#000";
+				ctx.lineJoin = "round";
+				ctx.lineWidth = 2;
+
+				for(var i = 0; i < clickX.length; i++) {		
+					ctx.beginPath();
+					if (clickDrag[i] && i) {
+						ctx.moveTo(clickX[i-1], clickY[i-1]);
+					} else {
+						ctx.moveTo(clickX[i]-1, clickY[i]);
+					}
+					ctx.lineTo(clickX[i], clickY[i]);
+					ctx.closePath();
+					ctx.stroke();
+				}
+			}
+			/* testing */
+
 		});
 		
 		function clearCanvas() {
@@ -84,15 +156,17 @@
     </script>
 </head>
 <body>
-	<h1>Sawket chat</h1>
-	<p>Node.js + Socket.io chat with some nice features, fork me on <a href="https://github.com/Fabryz/sawket" title="Fork me!">GitHub</a>.</p>
-  	<canvas id="canvas" width="500" height="200"></canvas>
-  	<div id="chat">
-		<div id="log"><ul></ul></div>
-		<div id="users"><ul></ul></div>
-		<input type="text" id="text" name="text" value="" />
-		<div class="clearer"></div>
+	<div id="wrapper">
+		<h1>Sawket chat</h1>
+		<p>Node.js + Socket.io chat with some nice features, fork me on <a href="https://github.com/Fabryz/sawket" title="Fork me!">GitHub</a>.</p>
+	  	<canvas id="canvas" width="600" height="250"></canvas>
+	  	<div id="chat">
+			<div id="log"><ul></ul></div>
+			<div id="users"><ul></ul></div>
+			<input type="text" id="text" name="text" value="" />
+			<div class="clearer"></div>
+		</div>
+		<div id="credits"><p>Copyright &copy; 2011 Fabrizio Codello</p></div>
 	</div>
-	<div id="credits"><p>Copyright &copy; 2011 Fabrizio Codello</p></div>
 </body>
 </html>
